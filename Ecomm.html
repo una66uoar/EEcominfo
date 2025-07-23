@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>통신판매업 일괄 조회</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    th { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h2>통신판매업 등록정보 일괄 조회</h2>
+  <input type="file" id="excelFile" accept=".xlsx,.xls" /><br><br>
+
+  <label for="sortField">정렬 기준:</label>
+  <select id="sortField">
+    <option value="0">부서명</option>
+    <option value="1">고객점코드</option>
+    <option value="2">사업자번호</option>
+    <option value="3">상호명</option>
+    <option value="4">대표자명</option>
+    <option value="5">영업상태</option>
+    <option value="6">신고일자</option>
+  </select>
+  <button onclick="sortTable()">정렬</button>
+
+  <p id="status"></p>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>부서명</th><th>고객점코드</th><th>사업자번호</th><th>상호명</th><th>대표자명</th><th>영업상태</th>
+        <th>통신판매업 신고번호<br>(관할신고기관)</th><th>신고일자</th><th>홈페이지</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let rawData = [];
+
+    document.getElementById('excelFile').addEventListener('change', function(e) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet);
+
+        const bizCol = Object.keys(json[0]).find(col => col.includes('사업자'));
+        const deptCol = Object.keys(json[0]).find(col => col.includes('부서'));
+        const codeCol = Object.keys(json[0]).find(col => col.includes('고객점'));
+
+        if (!bizCol || !deptCol || !codeCol) {
+          alert('사업자등록번호 / 부서명 / 고객점코드 열이 모두 필요합니다.');
+          return;
+        }
+
+        rawData = json.map(row => ({
+          biz: (row[bizCol] || '').toString().replace(/[^0-9]/g, ''),
+          dept: row[deptCol] || '',
+          code: row[codeCol] || ''
+        }));
+
+        document.getElementById('status').innerText = `${rawData.length}건 준비됨.`;
+      };
+      reader.readAsArrayBuffer(e.target.files[0]);
+    });
+
+    async function startLookup() {
+      const resultBody = document.querySelector("#resultTable tbody");
+      resultBody.innerHTML = "";
+
+      for (let i = 0; i < rawData.length; i++) {
+        const { biz, dept, code } = rawData[i];
+        document.getElementById('status').innerText = `조회중: ${i + 1}/${rawData.length}`;
+        const url = `https://apis.data.go.kr/1130000/MllBsDtl_2Service/getMllBsInfoDetail_2?serviceKey=Q7dUUU%2BSNeVWuGaKYUqXuLHMLnTeLQH0LwrGL2wU4RenLTq5Hu1JY5p9%2FnF49TPyiLq3EQkCk%2FTZn3s84WhsMA%3D%3D&brno=${biz}&resultType=xml&pageNo=1&numOfRows=1`;
+
+        try {
+          const res = await fetch(url);
+          const text = await res.text();
+          const xml = new window.DOMParser().parseFromString(text, "text/xml");
+          const item = xml.querySelector("item");
+
+          if (!item) {
+            resultBody.innerHTML += `<tr><td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">등록내역 없음</td></tr>`;
+            continue;
+          }
+
+          const get = tag => (item?.querySelector(tag)?.textContent || "").trim();
+
+          const domainRaw = get("domnCn");
+          const domains = domainRaw && domainRaw !== "N/A" ? domainRaw.split(/[\s,]+/).filter(Boolean) : [];
+          const domainLinks = domains.map(d => {
+            try {
+              const url = new URL(d.startsWith('http') ? d : 'http://' + d);
+              return `<a href="${url.href}" target="_blank">${url.href}</a>`;
+            } catch {
+              return d;
+            }
+          }).join("<br>");
+
+          const 신고번호 = get("prmmiMnno");
+          const 신고기관 = get("dclrInstNm");
+          const 신고일자 = get("dclrDate");
+
+          resultBody.innerHTML += `<tr>
+            <td>${dept}</td><td>${code}</td><td>${biz}</td>
+            <td>${get("bzmnNm")}</td><td>${get("rprsvNm")}</td><td>${get("operSttusCdNm")}</td>
+            <td>${신고번호}<br>(${신고기관})</td><td>${신고일자}</td><td>${domainLinks}</td>
+          </tr>`;
+        } catch (e) {
+          console.error(biz, "실패:", e);
+          resultBody.innerHTML += `<tr><td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">조회 실패</td></tr>`;
+        }
+
+        await new Promise(r => setTimeout(r, 200));
+      }
+
+      document.getElementById('status').innerText = "조회 완료";
+    }
+
+    function sortTable() {
+      const table = document.getElementById("resultTable");
+      const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.rows);
+      const idx = parseInt(document.getElementById("sortField").value);
+
+      rows.sort((a, b) => {
+        const textA = a.cells[idx].innerText.trim();
+        const textB = b.cells[idx].innerText.trim();
+        return textA.localeCompare(textB, 'ko');
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
+    }
+  </script>
+
+  <br>
+  <button onclick="startLookup()">조회 시작</button>
+</body>
+</html>
