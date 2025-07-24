@@ -147,6 +147,18 @@
       const today = new Date().toISOString().split('T')[0];
       const tabId = `tab-${today}`;
 
+      // 기존 탭 있으면 경고창
+      const existingTab = document.getElementById(tabId);
+      if (existingTab) {
+        if (confirm(`${today} 날짜의 기존 데이터가 있습니다. 삭제하고 다시 조회하시겠습니까?`)) {
+          existingTab.remove();
+          const oldBtn = [...document.getElementById('tabButtons').children].find(btn => btn.textContent === today);
+          if (oldBtn) oldBtn.remove();
+        } else {
+          return;
+        }
+      }
+
       const tabBtn = document.createElement('button');
       tabBtn.textContent = today;
       tabBtn.onclick = () => activateTab(tabId);
@@ -213,7 +225,6 @@
 
       document.getElementById('status').innerText = "조회 완료";
 
-      // 저장
       const history = JSON.parse(localStorage.getItem('lookupHistory') || '{}');
       history[today] = contentDiv.innerHTML;
       localStorage.setItem('lookupHistory', JSON.stringify(history));
@@ -275,5 +286,3 @@
  </div>
 </body>
 </html>
-
-
