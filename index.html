@@ -95,27 +95,6 @@
       text-align: center;
     }
 
-    #loader {
-      display: none;
-      text-align: center;
-      margin-top: 1rem;
-    }
-
-    .spinner {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #3498db;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
@@ -145,8 +124,6 @@
     </select>
     <button onclick="sortTable()">정렬</button>
     <button onclick="startLookup()">조회 시작</button>
-
-    <div id="loader"><div class="spinner"></div></div>
 
     <p id="status"></p>
 
@@ -192,10 +169,7 @@
       reader.readAsArrayBuffer(e.target.files[0]);
     });
 
-    const loader = document.getElementById('loader');
-
     async function startLookup() {
-      loader.style.display = 'block';
       const resultBody = document.querySelector("#resultTable tbody");
       resultBody.innerHTML = "";
 
@@ -236,13 +210,8 @@
         await new Promise(r => setTimeout(r, 200));
       }
 
-      loader.style.display = 'none';
       document.getElementById('status').innerText = "조회 완료";
     }
   </script>
 </body>
 </html>
-
-
-
-
