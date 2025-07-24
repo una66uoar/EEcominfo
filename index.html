@@ -22,6 +22,14 @@
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 0 12px rgba(0,0,0,0.08);
+      position: relative;
+    }
+
+    .logo {
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      height: 40px;
     }
 
     h2 {
@@ -121,6 +129,7 @@
 </head>
 <body>
   <div class="container">
+    <img src="그림1.png" alt="로고" class="logo" />
     <h2>통신판매업 등록정보 일괄 조회</h2>
     <input type="file" id="excelFile" accept=".xlsx,.xls" />
     <br><br>
