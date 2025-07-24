@@ -44,6 +44,28 @@
     padding: 2rem;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     border-radius: 12px;
+    overflow-x: auto;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: auto;
+  }
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th {
+    background-color: #e6f2ff;
+  }
+
+  td {
+    background-color: #ffffff;
   }
   </style>
 </head>
@@ -129,7 +151,7 @@
           const get = tag => (item?.querySelector(tag)?.textContent || "").trim();
 
           const domainRaw = get("domnCn");
-          const domains = domainRaw && domainRaw !== "N/A" ? domainRaw.split(/[\s,]+/).filter(Boolean) : [];
+          const domains = domainRaw && domainRaw !== "N/A" ? domainRaw.split(/[,\s]+/).filter(Boolean) : [];
           const domainLinks = domains.map(d => {
             try {
               const url = new URL(d.startsWith('http') ? d : 'http://' + d);
