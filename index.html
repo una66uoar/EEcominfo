@@ -2,141 +2,78 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>통신판매업 일괄 조회</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f4f6f8;
-      color: #333;
-      margin: 0;
-      padding: 0;
-    }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 2rem;
+  }
 
-    .container {
-      max-width: 960px;
-      margin: 2rem auto;
-      background-color: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.08);
-      position: relative;
-    }
+  h1 {
+    color: #2c3e50;
+    font-size: 2rem;
+  }
 
-    .logo {
-      position: absolute;
-      top: 1rem;
-      right: 1.5rem;
-      height: 40px;
-    }
+  input, button, select {
+    padding: 8px 12px;
+    margin: 5px 0;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
 
-    h2 {
-      text-align: center;
-      color: #2c3e50;
-    }
+  button {
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
 
-    input, button, select {
-      padding: 10px 14px;
-      margin: 6px 0;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      outline: none;
-    }
+  button:hover {
+    background-color: #2980b9;
+  }
 
-    button {
-      background-color: #3498db;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #2980b9;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1.5rem;
-      font-size: 0.95rem;
-      table-layout: auto;
-      border: 1px solid #bbb;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-      vertical-align: middle;
-      word-wrap: break-word;
-    }
-
-    th {
-      background-color: #dfe6ec;
-      color: #2c3e50;
-      font-weight: 600;
-    }
-
-    tbody tr {
-      background-color: #ffffff;
-    }
-
-    tbody tr:nth-child(even) {
-      background-color: #f4f7fa;
-    }
-
-    #status {
-      margin-top: 1rem;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-      }
-
-      table, th, td {
-        font-size: 0.85rem;
-      }
-    }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 2rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+  }
   </style>
 </head>
 <body>
   <div class="container">
-    <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAeCAYAAAC0lRUvAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABMklEQVRoge3ZsUoDQRBE0VOaqegR9E3R6qA7QNkEMRkcIPIRNYukGLNY8IS77zcyw7db2NwN8vN8zqte0WAXj8vfnOZ1v4+qEb1ZXhDw80M74rP9DbbfUSIvcm8TI/8xoszOzEo5tqPEEyjtiwHML0uIZ1GKLzqLNrMnC1jIzzl8VKVtWZGPWKI9jVGH2NYfWNYbWJYfWNYfWNYfWNYfWNZf+ml7ePZmYNW6bYrMRmOwYfUOUL7ZZ4b9NmTXs1wn6aZZzB9rGhGfrGsZfnHHKX8DVaJnhvgfPucAAAAASUVORK5CYII=" alt="로고" />
-    <h2>통신판매업 등록정보 일괄 조회</h2>
-    <input type="file" id="excelFile" accept=".xlsx,.xls" />
-    <br><br>
-    <label for="sortField">정렬 기준:</label>
-    <select id="sortField">
-      <option value="0">부서명</option>
-      <option value="1">고객점코드</option>
-      <option value="2">사업자번호</option>
-      <option value="3">상호명</option>
-      <option value="4">대표자명</option>
-      <option value="5">영업상태</option>
-      <option value="6">신고일자</option>
-    </select>
-    <button onclick="sortTable()">정렬</button>
-    <button onclick="startLookup()">조회 시작</button>
+  <h2>통신판매업 등록정보 일괄 조회</h2>
+  <input type="file" id="excelFile" accept=".xlsx,.xls" /><br><br>
 
-    <p id="status"></p>
+  <label for="sortField">정렬 기준:</label>
+  <select id="sortField">
+    <option value="0">부서명</option>
+    <option value="1">고객점코드</option>
+    <option value="2">사업자번호</option>
+    <option value="3">상호명</option>
+    <option value="4">대표자명</option>
+    <option value="5">영업상태</option>
+    <option value="6">신고일자</option>
+  </select>
+  <button onclick="sortTable()">정렬</button>
 
-    <table id="resultTable">
-      <thead>
-        <tr>
-          <th>부서명</th><th>고객점코드</th><th>사업자번호</th><th>상호명</th><th>대표자명</th><th>영업상태</th>
-          <th>통신판매업 신고번호<br>(관할신고기관)</th><th>신고일자</th><th>홈페이지</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <p id="status"></p>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>부서명</th><th>고객점코드</th><th>사업자번호</th><th>상호명</th><th>대표자명</th><th>영업상태</th>
+        <th>통신판매업 신고번호<br>(관할신고기관)</th><th>신고일자</th><th>홈페이지</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
   <script>
     let rawData = [];
@@ -184,27 +121,36 @@
           const xml = new window.DOMParser().parseFromString(text, "text/xml");
           const item = xml.querySelector("item");
 
-          const row = document.createElement("tr");
-          row.innerHTML = item ? `
-            <td>${dept}</td><td>${code}</td><td>${biz}</td>
-            <td>${item.querySelector("bzmnNm")?.textContent.trim() || ""}</td>
-            <td>${item.querySelector("rprsvNm")?.textContent.trim() || ""}</td>
-            <td>${item.querySelector("operSttusCdNm")?.textContent.trim() || ""}</td>
-            <td>${item.querySelector("prmmiMnno")?.textContent.trim() || ""}<br>(${item.querySelector("dclrInstNm")?.textContent.trim() || ""})</td>
-            <td>${item.querySelector("dclrDate")?.textContent.trim() || ""}</td>
-            <td>${
-    (item.querySelector("domnCn")?.textContent.trim().split(/\s|,/) || [])
-      .filter(d => d)
-      .map(d => `<a href="${d.startsWith('http') ? d : 'http://' + d}" target="_blank">${d}</a>`)
-      .join("<br>")
-  }</td>` : `<td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">등록내역 없음</td>`;
+          if (!item) {
+            resultBody.innerHTML += `<tr><td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">등록내역 없음</td></tr>`;
+            continue;
+          }
 
-          resultBody.appendChild(row);
+          const get = tag => (item?.querySelector(tag)?.textContent || "").trim();
+
+          const domainRaw = get("domnCn");
+          const domains = domainRaw && domainRaw !== "N/A" ? domainRaw.split(/[\s,]+/).filter(Boolean) : [];
+          const domainLinks = domains.map(d => {
+            try {
+              const url = new URL(d.startsWith('http') ? d : 'http://' + d);
+              return `<a href="${url.href}" target="_blank">${url.href}</a>`;
+            } catch {
+              return d;
+            }
+          }).join("<br>");
+
+          const 신고번호 = get("prmmiMnno");
+          const 신고기관 = get("dclrInstNm");
+          const 신고일자 = get("dclrDate");
+
+          resultBody.innerHTML += `<tr>
+            <td>${dept}</td><td>${code}</td><td>${biz}</td>
+            <td>${get("bzmnNm")}</td><td>${get("rprsvNm")}</td><td>${get("operSttusCdNm")}</td>
+            <td>${신고번호}<br>(${신고기관})</td><td>${신고일자}</td><td>${domainLinks}</td>
+          </tr>`;
         } catch (e) {
           console.error(biz, "실패:", e);
-          const row = document.createElement("tr");
-          row.innerHTML = `<td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">조회 실패</td>`;
-          resultBody.appendChild(row);
+          resultBody.innerHTML += `<tr><td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">조회 실패</td></tr>`;
         }
 
         await new Promise(r => setTimeout(r, 200));
@@ -212,6 +158,25 @@
 
       document.getElementById('status').innerText = "조회 완료";
     }
+
+    function sortTable() {
+      const table = document.getElementById("resultTable");
+      const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.rows);
+      const idx = parseInt(document.getElementById("sortField").value);
+
+      rows.sort((a, b) => {
+        const textA = a.cells[idx].innerText.trim();
+        const textB = b.cells[idx].innerText.trim();
+        return textA.localeCompare(textB, 'ko');
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
+    }
   </script>
+
+  <br>
+  <button onclick="startLookup()">조회 시작</button>
+ </div>
 </body>
 </html>
