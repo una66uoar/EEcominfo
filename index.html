@@ -162,6 +162,36 @@
   </div>
 
   <script>
+    let rawData = [];
+
+    document.getElementById('excelFile').addEventListener('change', function(e) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet);
+
+        const bizCol = Object.keys(json[0]).find(col => col.includes('사업자'));
+        const deptCol = Object.keys(json[0]).find(col => col.includes('부서'));
+        const codeCol = Object.keys(json[0]).find(col => col.includes('고객점'));
+
+        if (!bizCol || !deptCol || !codeCol) {
+          alert('사업자등록번호 / 부서명 / 고객점코드 열이 모두 필요합니다.');
+          return;
+        }
+
+        rawData = json.map(row => ({
+          biz: (row[bizCol] || '').toString().replace(/[^0-9]/g, ''),
+          dept: row[deptCol] || '',
+          code: row[codeCol] || ''
+        }));
+
+        document.getElementById('status').innerText = `${rawData.length}건 준비됨.`;
+      };
+      reader.readAsArrayBuffer(e.target.files[0]);
+    });
+
     const loader = document.getElementById('loader');
 
     async function startLookup() {
