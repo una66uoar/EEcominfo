@@ -129,7 +129,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAeCAYAAAC0lRUvAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABZklEQVRoge2ZwY3CMAxFb3Qqf//VJ/XsBbpT9nBgg3hBFsYUPuNqJZ1BhLOezoHbMHcdAwS2KEmZVnE4A0Zj9YOz0VgsKcG8BRgHu3eSgB2PPb+v9vj3gU6gOERQXxQUX8YUF8UFHfOFRewK3MNwVTkMSZLYCzAZ2Q9vNYwWyLo4M0vIK6AlRMzzAo+I3cbJowT6jV0cRddGZc0FszFLe5sN8zGzWskXY3CzvTxNdyTt+SWyGuMTJny5F97IE1XexHki3Aghuwz7ck1HUg3vFoPbRTmUy9MEjK0Z14vHcRn6r7kak6sFl8F2cVvx5p7PYGYZaD8+ZAF9tEflqBI9uM32SnExQf9mKlL0Q+LUF8UFHfOFRewUUH8UFEfFBQXxQUX8UFHfOEf6EDydUhtJGzwEAAAAASUVORK5CYII=" alt="로고" class="logo" />
+    <img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAAAeCAYAAAC0lRUvAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABMklEQVRoge3ZsUoDQRBE0VOaqegR9E3R6qA7QNkEMRkcIPIRNYukGLNY8IS77zcyw7db2NwN8vN8zqte0WAXj8vfnOZ1v4+qEb1ZXhDw80M74rP9DbbfUSIvcm8TI/8xoszOzEo5tqPEEyjtiwHML0uIZ1GKLzqLNrMnC1jIzzl8VKVtWZGPWKI9jVGH2NYfWNYbWJYfWNYfWNYfWNYfWNZf+ml7ePZmYNW6bYrMRmOwYfUOUL7ZZ4b9NmTXs1wn6aZZzB9rGhGfrGsZfnHHKX8DVaJnhvgfPucAAAAASUVORK5CYII=" alt="로고" />
     <h2>통신판매업 등록정보 일괄 조회</h2>
     <input type="file" id="excelFile" accept=".xlsx,.xls" />
     <br><br>
@@ -151,7 +151,6 @@
     <p id="status"></p>
 
     <table id="resultTable">
-      
       <thead>
         <tr>
           <th>부서명</th><th>고객점코드</th><th>사업자번호</th><th>상호명</th><th>대표자명</th><th>영업상태</th>
@@ -181,31 +180,27 @@
           const xml = new window.DOMParser().parseFromString(text, "text/xml");
           const item = xml.querySelector("item");
 
-          if (!item) {
-            resultBody.innerHTML += `<tr><td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">등록내역 없음</td></tr>`;
-            continue;
-          }
-
-          const get = tag => (item?.querySelector(tag)?.textContent || "").trim();
-          const domainRaw = get("domnCn");
-          const domains = domainRaw && domainRaw !== "N/A" ? domainRaw.split(/[\s,]+/).filter(Boolean) : [];
-          const domainLinks = domains.map(d => {
-            try {
-              const url = new URL(d.startsWith('http') ? d : 'http://' + d);
-              return `<a href="${url.href}" target="_blank">${url.href}</a>`;
-            } catch {
-              return d;
-            }
-          }).join("<br>");
-
-          resultBody.innerHTML += `<tr>
+          const row = document.createElement("tr");
+          row.innerHTML = item ? `
             <td>${dept}</td><td>${code}</td><td>${biz}</td>
-            <td>${get("bzmnNm")}</td><td>${get("rprsvNm")}</td><td>${get("operSttusCdNm")}</td>
-            <td>${get("prmmiMnno")}<br>(${get("dclrInstNm")})</td><td>${get("dclrDate")}</td><td>${domainLinks}</td>
-          </tr>`;
+            <td>${item.querySelector("bzmnNm")?.textContent.trim() || ""}</td>
+            <td>${item.querySelector("rprsvNm")?.textContent.trim() || ""}</td>
+            <td>${item.querySelector("operSttusCdNm")?.textContent.trim() || ""}</td>
+            <td>${item.querySelector("prmmiMnno")?.textContent.trim() || ""}<br>(${item.querySelector("dclrInstNm")?.textContent.trim() || ""})</td>
+            <td>${item.querySelector("dclrDate")?.textContent.trim() || ""}</td>
+            <td>${
+    (item.querySelector("domnCn")?.textContent.trim().split(/\s|,/) || [])
+      .filter(d => d)
+      .map(d => `<a href="${d.startsWith('http') ? d : 'http://' + d}" target="_blank">${d}</a>`)
+      .join("<br>")
+  }</td>` : `<td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">등록내역 없음</td>`;
+
+          resultBody.appendChild(row);
         } catch (e) {
           console.error(biz, "실패:", e);
-          resultBody.innerHTML += `<tr><td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">조회 실패</td></tr>`;
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">조회 실패</td>`;
+          resultBody.appendChild(row);
         }
 
         await new Promise(r => setTimeout(r, 200));
@@ -217,6 +212,7 @@
   </script>
 </body>
 </html>
+
 
 
 
