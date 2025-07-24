@@ -5,13 +5,50 @@
   <title>통신판매업 일괄 조회</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-    th { background: #f0f0f0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 2rem;
+  }
+
+  h1 {
+    color: #2c3e50;
+    font-size: 2rem;
+  }
+
+  input, button, select {
+    padding: 8px 12px;
+    margin: 5px 0;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  button {
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  button:hover {
+    background-color: #2980b9;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 2rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+  }
   </style>
 </head>
 <body>
+  <div class="container">
   <h2>통신판매업 등록정보 일괄 조회</h2>
   <input type="file" id="excelFile" accept=".xlsx,.xls" /><br><br>
 
@@ -140,5 +177,6 @@
 
   <br>
   <button onclick="startLookup()">조회 시작</button>
+ </div>
 </body>
 </html>
