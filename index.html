@@ -55,27 +55,57 @@
       border-collapse: collapse;
       margin-top: 1.5rem;
       font-size: 0.95rem;
+      table-layout: fixed;
+      border: 1px solid #bbb;
     }
 
     th, td {
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       padding: 10px;
       text-align: center;
+      vertical-align: middle;
+      word-wrap: break-word;
     }
 
     th {
-      background-color: #ecf0f1;
+      background-color: #dfe6ec;
+      color: #2c3e50;
       font-weight: 600;
     }
 
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
+    tbody tr {
+      background-color: #ffffff;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f4f7fa;
     }
 
     #status {
       margin-top: 1rem;
       font-weight: bold;
       text-align: center;
+    }
+
+    #loader {
+      display: none;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     @media (max-width: 768px) {
@@ -107,9 +137,22 @@
     <button onclick="sortTable()">정렬</button>
     <button onclick="startLookup()">조회 시작</button>
 
+    <div id="loader"><div class="spinner"></div></div>
+
     <p id="status"></p>
 
     <table id="resultTable">
+      <colgroup>
+        <col style="width: 12%">
+        <col style="width: 12%">
+        <col style="width: 14%">
+        <col style="width: 14%">
+        <col style="width: 10%">
+        <col style="width: 10%">
+        <col style="width: 16%">
+        <col style="width: 8%">
+        <col style="width: 14%">
+      </colgroup>
       <thead>
         <tr>
           <th>부서명</th><th>고객점코드</th><th>사업자번호</th><th>상호명</th><th>대표자명</th><th>영업상태</th>
@@ -120,10 +163,58 @@
     </table>
   </div>
 
-  <!-- 기존의 JS 코드 그대로 포함됨 -->
   <script>
-    // 생략. 위 코드 그대로 유지
+    const loader = document.getElementById('loader');
+
+    async function startLookup() {
+      loader.style.display = 'block';
+      const resultBody = document.querySelector("#resultTable tbody");
+      resultBody.innerHTML = "";
+
+      for (let i = 0; i < rawData.length; i++) {
+        const { biz, dept, code } = rawData[i];
+        document.getElementById('status').innerText = `조회중: ${i + 1}/${rawData.length}`;
+        const url = `https://apis.data.go.kr/1130000/MllBsDtl_2Service/getMllBsInfoDetail_2?serviceKey=Q7dUUU%2BSNeVWuGaKYUqXuLHMLnTeLQH0LwrGL2wU4RenLTq5Hu1JY5p9%2FnF49TPyiLq3EQkCk%2FTZn3s84WhsMA%3D%3D&brno=${biz}&resultType=xml&pageNo=1&numOfRows=1`;
+
+        try {
+          const res = await fetch(url);
+          const text = await res.text();
+          const xml = new window.DOMParser().parseFromString(text, "text/xml");
+          const item = xml.querySelector("item");
+
+          if (!item) {
+            resultBody.innerHTML += `<tr><td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">등록내역 없음</td></tr>`;
+            continue;
+          }
+
+          const get = tag => (item?.querySelector(tag)?.textContent || "").trim();
+          const domainRaw = get("domnCn");
+          const domains = domainRaw && domainRaw !== "N/A" ? domainRaw.split(/[\s,]+/).filter(Boolean) : [];
+          const domainLinks = domains.map(d => {
+            try {
+              const url = new URL(d.startsWith('http') ? d : 'http://' + d);
+              return `<a href="${url.href}" target="_blank">${url.href}</a>`;
+            } catch {
+              return d;
+            }
+          }).join("<br>");
+
+          resultBody.innerHTML += `<tr>
+            <td>${dept}</td><td>${code}</td><td>${biz}</td>
+            <td>${get("bzmnNm")}</td><td>${get("rprsvNm")}</td><td>${get("operSttusCdNm")}</td>
+            <td>${get("prmmiMnno")}<br>(${get("dclrInstNm")})</td><td>${get("dclrDate")}</td><td>${domainLinks}</td>
+          </tr>`;
+        } catch (e) {
+          console.error(biz, "실패:", e);
+          resultBody.innerHTML += `<tr><td>${dept}</td><td>${code}</td><td>${biz}</td><td colspan="6">조회 실패</td></tr>`;
+        }
+
+        await new Promise(r => setTimeout(r, 200));
+      }
+
+      loader.style.display = 'none';
+      document.getElementById('status').innerText = "조회 완료";
+    }
   </script>
 </body>
 </html>
-
