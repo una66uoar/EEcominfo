@@ -222,9 +222,10 @@
     function exportToExcel() {
       const activeTab = document.querySelector('.tab-content.active');
       if (!activeTab) return;
-
       const table = activeTab.querySelector("table");
-      const wb = XLSX.utils.table_to_book(table, { sheet: "조회결과" });
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.table_to_sheet(table);
+      XLSX.utils.book_append_sheet(wb, ws, "조회결과");
       XLSX.writeFile(wb, `조회결과_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
@@ -240,7 +241,7 @@
       rows.sort((a, b) => {
         const textA = a.cells[idx]?.innerText.trim() || "";
         const textB = b.cells[idx]?.innerText.trim() || "";
-        return textA.localeCompare(textB, 'ko');
+        return textA.localeCompare(textB, 'ko', { numeric: true });
       });
 
       rows.forEach(row => tbody.appendChild(row));
@@ -251,12 +252,10 @@
       document.getElementById(id)?.classList.add('active');
     }
 
-    // 페이지 로드 시 localStorage 복원
     window.addEventListener('load', () => {
       const history = JSON.parse(localStorage.getItem('lookupHistory') || '{}');
       for (const date in history) {
         const tabId = `tab-${date}`;
-
         const tabBtn = document.createElement('button');
         tabBtn.textContent = date;
         tabBtn.onclick = () => activateTab(tabId);
