@@ -37,7 +37,8 @@
   }
 
   .container {
-    max-width: 1000px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     background-color: white;
     padding: 2rem;
@@ -48,8 +49,10 @@
 
   table {
     border-collapse: collapse;
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     table-layout: auto;
+    font-family: 'Batang', serif;
   }
 
   th, td {
@@ -100,6 +103,7 @@
     <option value="6">신고일자</option>
   </select>
   <button onclick="sortTable()">정렬</button>
+  <button onclick="exportToExcel()">엑셀 저장</button>
 
   <p id="status"></p>
 
@@ -155,6 +159,7 @@
       activateTab(tabId);
 
       const table = document.createElement('table');
+      table.id = `table-${today}`;
       const thead = document.createElement('thead');
       thead.innerHTML = `<tr>
         <th>부서명</th><th>고객점코드</th><th>사업자번호</th><th>상호명</th><th>대표자명</th><th>영업상태</th>
@@ -183,7 +188,7 @@
           } else {
             const get = tag => (item?.querySelector(tag)?.textContent || "").trim();
             const domainRaw = get("domnCn");
-            const domains = domainRaw && domainRaw !== "N/A" ? domainRaw.split(/[\s,]+/).filter(Boolean) : [];
+            const domains = domainRaw && domainRaw !== "N/A" ? domainRaw.split(/\s|,|;/).filter(Boolean) : [];
             const domainLinks = domains.map(d => {
               try {
                 const url = new URL(d.startsWith('http') ? d : 'http://' + d);
@@ -212,6 +217,15 @@
       const history = JSON.parse(localStorage.getItem('lookupHistory') || '{}');
       history[today] = contentDiv.innerHTML;
       localStorage.setItem('lookupHistory', JSON.stringify(history));
+    }
+
+    function exportToExcel() {
+      const activeTab = document.querySelector('.tab-content.active');
+      if (!activeTab) return;
+
+      const table = activeTab.querySelector("table");
+      const wb = XLSX.utils.table_to_book(table, { sheet: "조회결과" });
+      XLSX.writeFile(wb, `조회결과_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
     function sortTable() {
@@ -262,4 +276,5 @@
  </div>
 </body>
 </html>
+
 
