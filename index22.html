@@ -186,7 +186,8 @@
       for (let i = 0; i < rawData.length; i++) {
         const { biz, dept, code } = rawData[i];
         document.getElementById('status').innerText = `조회중: ${i + 1}/${rawData.length}`;
-        const url = `https://apis.data.go.kr/1130000/MllBsDtl_2Service/getMllBsInfoDetail_2?serviceKey=Q7dUUU%2BSNeVWuGaKYUqXuLHMLnTeLQH0LwrGL2wU4RenLTq5Hu1JY5p9%2FnF49TPyiLq3EQkCk%2FTZn3s84WhsMA%3D%3D&brno=${biz}&resultType=xml&pageNo=1&numOfRows=1`;
+        const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+        const url = proxyUrl + `https://apis.data.go.kr/1130000/MllBsDtl_2Service/getMllBsInfoDetail_2?serviceKey=Q7dUUU%2BSNeVWuGaKYUqXuLHMLnTeLQH0LwrGL2wU4RenLTq5Hu1JY5p9%2FnF49TPyiLq3EQkCk%2FTZn3s84WhsMA%3D%3D&brno=${biz}&resultType=xml&pageNo=1&numOfRows=1`;
 
         try {
           const res = await fetch(url);
@@ -286,3 +287,4 @@
  </div>
 </body>
 </html>
+
